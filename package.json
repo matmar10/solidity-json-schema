@@ -1,0 +1,36 @@
+{
+  "name": "solidity-json-schema",
+  "version": "0.1.0",
+  "description": "Convert solidity ABI definition to a JSON schema.",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/tape/bin/tape test.js | node_modules/.bin/tap-spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blossomfinance/solidity-json-schema.git"
+  },
+  "keywords": [
+    "solidity",
+    "ethereum",
+    "JSON",
+    "schema",
+    "JSON",
+    "validation",
+    "validate",
+    "truffle",
+    "ABI",
+    "blockchain",
+    "cryptocurrency"
+  ],
+  "author": "Matthew J. Martin <matthew.mar10@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/blossomfinance/solidity-json-schema/issues"
+  },
+  "homepage": "https://github.com/blossomfinance/solidity-json-schema#readme",
+  "dependencies": {
+    "object-mapper": "^5.0.0",
+    "traverse": "^0.6.6"
+  }
+}
