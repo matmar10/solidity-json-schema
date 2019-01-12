@@ -36,6 +36,7 @@
   "devDependencies": {
     "openzeppelin-solidity": "^2.1.1",
     "release-it": "^9.8.0",
+    "tap-spec": "^5.0.0",
     "tape": "^4.9.2"
   }
 }
