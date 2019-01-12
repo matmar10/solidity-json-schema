@@ -4,6 +4,7 @@
   "description": "Convert solidity ABI definition to a JSON schema.",
   "main": "index.js",
   "scripts": {
+    "release": "release-it",
     "test": "./node_modules/tape/bin/tape test.js | node_modules/.bin/tap-spec"
   },
   "repository": {
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "openzeppelin-solidity": "^2.1.1",
+    "release-it": "^9.8.0",
     "tape": "^4.9.2"
   }
 }
