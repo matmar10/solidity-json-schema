@@ -120,7 +120,10 @@ function mapNode(node, options) {
         // ignore this property
         return;
       }
-      adder(subSchema, nameForNode(subNode));
+      const name = nameForNode(subNode);
+      const description = `${subNode.type} ${name}`;
+      subSchema.description = description;
+      adder(subSchema, name);
     });
     return schema;
   }

@@ -31,5 +31,9 @@
   "homepage": "https://github.com/blossomfinance/solidity-json-schema#readme",
   "dependencies": {
     "merge": "^1.2.1"
+  },
+  "devDependencies": {
+    "openzeppelin-solidity": "^2.1.1",
+    "tape": "^4.9.2"
   }
 }
