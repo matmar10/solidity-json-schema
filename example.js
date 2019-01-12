@@ -5,6 +5,10 @@ const test = require('tape');
 
 const convert = require('./index');
 
-const erc20Abi = require('./node_modules/openzeppelin-solidity/build/contracts/ERC20.json').abi;
-const converted = JSON.stringify(convert(erc20Abi));
-console.log(converted);
+const abi = require('./node_modules/openzeppelin-solidity/build/contracts/AllowanceCrowdsale.json').abi;
+const output = JSON.stringify(convert(abi, {
+  as: 'array',
+  for: 'inputs',
+  type: 'constructor'
+}));
+console.log(output);

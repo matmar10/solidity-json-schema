@@ -49,3 +49,8 @@ const schema2 = convert(abi, {
 //   }
 // }
 ```
+
+## Known Issues
+
+- Does not de-references imported contracts
+- Not found returns undefined
