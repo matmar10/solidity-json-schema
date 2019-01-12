@@ -30,7 +30,6 @@
   },
   "homepage": "https://github.com/blossomfinance/solidity-json-schema#readme",
   "dependencies": {
-    "object-mapper": "^5.0.0",
-    "traverse": "^0.6.6"
+    "merge": "^1.2.1"
   }
 }

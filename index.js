@@ -1,7 +1,6 @@
 'use strict';
 
-const objectMapper = require('object-mapper');
-const traverse = require('traverse');
+const merge = require('merge');
 
 const types = {
 
@@ -58,61 +57,141 @@ const typesRegex = {
 function mapType(type) {
   const mapped = types[type];
   if (mapped) {
-    return mapped;
+    return merge(true, mapped);
   }
 
   for (let pattern in typesRegex) {
     const exp = new RegExp(pattern);
     if (exp.test(type)) {
-      return typesRegex[pattern];
+      return merge(true, typesRegex[pattern]);
     }
   }
   throw new Error(`Unsupported type: ${type}`);
 }
 
-function mapNode(node) {
+function nameForNode(node) {
+  if (node.type && node.name) {
+    return ('constructor' === node.type) ? node.type : node.name;
+  }
+  return node.type;
+}
 
-  // this is for property getters
-  if (!node.inputs.length && 1 === node.outputs.length) {
-    const schema = mapType(node.outputs[0].type);
-    if (!schema) {
-      throw new Error('Undefined type: ' + node.outputs[0].type);
+function mapNode(node, options) {
+
+  options = options || {};
+  options.as = options.as || 'array';
+
+  function buildAs(subNode, property, as) {
+    let schema;
+    let adder;
+
+    if ('object' === as) {
+      // as object
+      schema = {
+        type: 'object',
+        required: [],
+        properties: {}
+      };
+      adder = (subSchema, name) => {
+        schema.properties[name] = subSchema;
+        schema.required.push(name);
+      };
+    } else if ('array' === as) {
+      // as array
+      schema = {
+        type: 'array',
+        items: []
+      };
+      adder = (subSchema, name) => {
+        subSchema.description = name;
+        schema.items.push(subSchema);
+      };
+    } else {
+      throw new Error(`Unsupported argument 'as': ${options.as}`);
     }
+
+    const source = subNode[property];
+    if (!Array.isArray(source)) {
+      return schema;
+    }
+    source.forEach(subNode => {
+      const subSchema = mapType(subNode.type);
+      if (!subSchema) {
+        // ignore this property
+        return;
+      }
+      adder(subSchema, nameForNode(subNode));
+    });
     return schema;
   }
 
-  // this is for property getters/setters
+  if (options.for) {
+    return buildAs(node, options.for, options.as);
+  }
 
   const schema = {
     type: 'object',
-    required: [],
     properties: {}
   };
-  node.inputs.forEach(input => {
-    const subSchema = mapType(input.type);
-    if (!subSchema) {
-      return;
-    }
-    let name = (input.name) ? input.name : input.type + 'Input';
-    schema.properties[name] = subSchema;
-    schema.required.push(name);
-  });
+  schema.properties.inputs = buildAs(node, 'inputs', options.as);
+  schema.properties.outputs = buildAs(node, 'outputs', options.as);
   return schema;
 }
 
 function convert(abi, options) {
+
+  options = options || {};
+
+  // special case - find constructor
+  // do this seperately to keep the others fast
+  if ('constructor' === options.type || 'constructor' === options.name) {
+    let schema;
+    abi.forEach(function (node) {
+      if ('constructor' !== node.type) {
+        return;
+      }
+      schema = mapNode(node, options);
+    });
+    return schema;
+  }
+
+  // filter by type
+  if (options.type) {
+    const schema = {
+      type: 'object',
+      properties: {}
+    };
+    abi.forEach(function (node) {
+      if (options.type !== node.type && 'constructor' !== node.type) {
+        return;
+      }
+      const subSchema = mapNode(node, options);
+      const name = nameForNode(node);
+      subSchema.description = `${node.type} ${name}`;
+      schema.properties[name] = subSchema;
+    });
+    return schema;
+  }
+
+  // find by name
+  if (options.name) {
+    let schema;
+    abi.forEach(function (node) {
+      if (options.name !== node.name) {
+        return;
+      }
+      schema = mapNode(node, options);
+    });
+    return schema;
+  }
+
   const schema = {
     type: 'object',
     properties: {}
   };
   abi.forEach(function (node) {
-    if ('constructor' === node.type) {
-      schema.properties.constructor = mapNode(node);
-      return;
-    }
-    if ('function' === node.type) {
-      schema.properties[node.name] = mapNode(node);
-    }
+    const name = nameForNode(node);
+    schema.properties[name] = mapNode(node, options);
   });
 
   return schema;
